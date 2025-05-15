@@ -1,0 +1,10 @@
+url: https://doladowania.payu.pl/faktura
+users:
+  - id: 1
+    tin: XXXXXXXXXX
+    invoiceFrequency: MONTHLY
+    invoiceAddress_name: John Doe
+    invoiceAddress_street: Example Street 123
+    invoiceAddress_postalCode: 00-000
+    invoiceAddress_city: Example City
+    invoiceAddress_country: PL
