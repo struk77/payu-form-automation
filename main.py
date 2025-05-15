@@ -15,7 +15,7 @@ def main(config, order_id, phone, user_id):
     user = next((u for u in config["users"] if u["id"] == user_id), None)
 
     if not user:
-        print(f"Користувач із ID {user_id} не знайдений!")
+        print(f"User with ID {user_id} not found!")
         return
 
     session = requests.Session()
@@ -24,20 +24,20 @@ def main(config, order_id, phone, user_id):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
     }
     response = session.get(url, headers=headers)
-    # Отримуємо токен із Set-Cookie (XSRF-TOKEN)
+    # Get token from Set-Cookie (XSRF-TOKEN)
     xsrf_token = response.cookies.get("XSRF-TOKEN")
     if not xsrf_token:
-        print("Не вдалося знайти XSRF-TOKEN у відповіді")
+        print("Failed to find XSRF-TOKEN in the response")
         return
 
-    # Витягуємо hidden `_token` із HTML
+    # Extract hidden `_token` from HTML
     soup = BeautifulSoup(response.text, "html.parser")
     hidden_token = soup.find("input", {"name": "_token"})["value"]
     if not hidden_token:
-        print("Не вдалося знайти _token у HTML")
+        print("Failed to find _token in HTML")
         return
 
-    # Встановлюємо токен у заголовок X-XSRF-TOKEN
+    # Set token in X-XSRF-TOKEN header
     headers["X-XSRF-TOKEN"] = xsrf_token
 
     payload = user
@@ -60,23 +60,23 @@ def main(config, order_id, phone, user_id):
     elif error_message:
         return error_message.text.strip()
     else:
-        return "Не вдалося знайти повідомлення про результат операції"
+        return "Failed to find operation result message"
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Автоматизована відправка форми PayU")
-    parser.add_argument("order_id", help="Номер замовлення")
-    parser.add_argument("phone", help="Номер телефону")
+    parser = argparse.ArgumentParser(description="Automated PayU form submission")
+    parser.add_argument("order_id", help="Order number")
+    parser.add_argument("phone", help="Phone number")
     parser.add_argument(
         "user_id",
         type=int,
         nargs="?",
         default=1,
-        help="ID користувача (за замовчуванням 1)",
+        help="User ID (default is 1)",
     )
     args = parser.parse_args()
 
-    # Завантаження конфігу
+    # Load configuration
     config_path = "config.yaml"
     config = load_config(config_path)
     result = main(config, args.order_id, args.phone, args.user_id)
