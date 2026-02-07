@@ -12,8 +12,8 @@ This project automates the process of submitting a Faktura VAT form to PayU usin
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/struk77/doladowania.git
-   cd doladowania
+   git clone https://github.com/struk77/payu-form-automation.git
+   cd payu-form-automation
    ```
 
 2. **Install dependencies:**
