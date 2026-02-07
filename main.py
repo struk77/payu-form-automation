@@ -1,3 +1,4 @@
+import os
 import yaml
 import argparse
 
@@ -10,48 +11,49 @@ def load_config(config_path):
         return yaml.safe_load(f)
 
 
-def main(config, order_id, phone, user_id):
+def main(config, order_id, phone, user_id) -> str:
     url = config["url"]
     user = next((u for u in config["users"] if u["id"] == user_id), None)
 
-    if not user:
-        print(f"User with ID {user_id} not found!")
-        return
+    if not user or not isinstance(user, dict):
+        return f"User with ID {user_id} not found!"
 
-    session = requests.Session()
+    with requests.Session() as session:
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
-    }
-    response = session.get(url, headers=headers)
-    # Get token from Set-Cookie (XSRF-TOKEN)
-    xsrf_token = response.cookies.get("XSRF-TOKEN")
-    if not xsrf_token:
-        print("Failed to find XSRF-TOKEN in the response")
-        return
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+        }
+        response = session.get(url, headers=headers)
+        # Get token from Set-Cookie (XSRF-TOKEN)
+        xsrf_token = response.cookies.get("XSRF-TOKEN")
+        if not xsrf_token:
+            return "Failed to find XSRF-TOKEN in the response"
 
-    # Extract hidden `_token` from HTML
-    soup = BeautifulSoup(response.text, "html.parser")
-    hidden_token = soup.find("input", {"name": "_token"})["value"]
-    if not hidden_token:
-        print("Failed to find _token in HTML")
-        return
+        # Extract hidden `_token` from HTML
+        soup = BeautifulSoup(response.text, "html.parser")
+        hidden_token = soup.find("input", {"name": "_token"})
+        if not hidden_token:
+            return "Failed to find _token in HTML"
 
-    # Set token in X-XSRF-TOKEN header
-    headers["X-XSRF-TOKEN"] = xsrf_token
+        hidden_token = hidden_token["value"]  # type: ignore
 
-    payload = user
-    payload["_token"] = hidden_token
-    payload["order"] = order_id
-    payload["phone"] = phone
+        # Set token in X-XSRF-TOKEN header
+        headers["X-XSRF-TOKEN"] = xsrf_token
 
-    response = session.post(url, headers=headers, data=payload)
+        payload = user.copy()
+        payload["_token"] = hidden_token
+        payload["order"] = order_id
+        payload["phone"] = phone
+
+        response = session.post(url, headers=headers, data=payload)
 
     soup = BeautifulSoup(response.text, "html.parser")
 
     # Debug: Save HTML to file
-    with open("response.html", "w", encoding="utf-8") as f:
-        f.write(response.text)
+    if os.getenv("LOG_LEVEL") == "DEBUG":
+        print("Saving response to response.html")
+        with open("response.html", "w", encoding="utf-8") as f:
+            f.write(response.text)
 
     success_message = soup.find("div", class_="alert-success")
     error_message = soup.find("div", class_="alert-danger")

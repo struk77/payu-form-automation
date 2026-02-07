@@ -4,35 +4,33 @@ This project automates the process of submitting a Faktura VAT form to PayU usin
 
 ## Prerequisites
 
-- Python 3.9 or higher
-- Pipenv for managing dependencies
+- Python 3.13 or higher
+- [Poetry](https://python-poetry.org/) for managing dependencies
 
 ## Setup
 
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/struk77/payu-form-automation.git
-   cd payu-form-automation
+   git clone https://github.com/struk77/doladowania.git
+   cd doladowania
    ```
 
 2. **Install dependencies:**
 
-   Use Pipenv to install the required packages:
-
    ```bash
-   pipenv install
+   poetry install
    ```
 
-3. **Activate the virtual environment:**
+3. **Create a `config.yaml` file:**
+
+   Copy the example config and fill in your personal information:
 
    ```bash
-   pipenv shell
+   cp config.yaml.example config.yaml
    ```
 
-4. **Create a `config.yaml` file:**
-
-   Create a `config.yaml` file in the root directory with your personal information. Example structure:
+   Edit `config.yaml` with your details. See `config.yaml.example` for the expected structure:
 
    ```yaml
    url: https://doladowania.payu.pl/faktura
@@ -52,17 +50,25 @@ This project automates the process of submitting a Faktura VAT form to PayU usin
 Run the script with the following command:
 
 ```bash
-python main.py <order_id> <phone> [user_id]
+poetry run python main.py <order_id> <phone> [user_id]
 ```
 
 - `<order_id>`: The order number.
 - `<phone>`: The phone number.
 - `[user_id]`: Optional user ID (default is 1).
 
-## Example
+### Example
 
 ```bash
-python main.py 1234567890 123456789 1
+poetry run python main.py 1234567890 123456789 1
+```
+
+### Debug mode
+
+Set `LOG_LEVEL=DEBUG` to save the raw HTML response to `response.html` for troubleshooting:
+
+```bash
+LOG_LEVEL=DEBUG poetry run python main.py 1234567890 123456789
 ```
 
 ## License

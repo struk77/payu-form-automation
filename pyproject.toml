@@ -1,0 +1,19 @@
+[project]
+name = "doladowania"
+version = "0.1.1"
+description = ""
+authors = [
+    {name = "struk77",email = "struk@duck.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13,<4.0"
+dependencies = [
+    "requests>=2.32.4,<3.0.0",
+    "beautifulsoup4>=4.13.4,<5.0.0",
+    "pyyaml>=6.0.2,<7.0.0",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
